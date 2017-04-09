@@ -27,12 +27,12 @@ run command
 
 >docker run --network="host" eventstream
 
-(
+
 Run directly from docker image using docker.io/nileshbhosale/eventstream
 
 >docker run --network="host" nileshbhosale/eventstream
 
-)
+
 
 
 Call Following APIS from Postman (Included postman file in the root folder	)
