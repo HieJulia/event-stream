@@ -20,12 +20,18 @@ https://store.docker.com/search?type=edition&offering=community
 6. Browse to the folder location checked out from master branch from terminal.
 run command 
 >mvn clean
+
 >mvn install
+
 >docker build -f DockerFile -t eventstream .
+
 >docker run --network="host" eventstream
+
 (
 Run directly from docker image using docker.io/nileshbhosale/eventstream
+
 >docker run --network="host" nileshbhosale/eventstream
+
 )
 
 
