@@ -1,0 +1,91 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Event Stream",
+		"_postman_id": "e9f1af41-c9f9-6f81-c4a5-23c27fd08c4a",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Put an event in stream",
+			"request": {
+				"url": "http://localhost:8080/apis/v1/stream",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"noun\": \"bill\",\n\t\"userid\": 4, \n\t\"ts\": \"20170315 134850\", \n\t\"latlong\": \"19.07,72.87\", \n\t\"verb\": \"pay\",\n\t\"timespent\": 172, \n\t\"properties\": {\n\t\t\"bank\": \"sbi\", \n\t\t\"merchantid\": 214, \n\t\t\"value\": 5000, \n\t\t\"mode\":\"netbank\"\n\t}\n}"
+				},
+				"description": "Sample Json:\n\n{\n\t\"noun\": \"bill\",\n\t\"latlong\": \"19.07,72.87\", \n\t\"verb\": \"pay\",\n\t\"properties\": {\n\t\t\"bank\": \"sbi\", \n\t\t\"merchantid\": 214, \n\t\t\"value\": 191.5, \n\t\t\"mode\":\"netbank\"\n\t}\n}"
+			},
+			"response": []
+		},
+		{
+			"name": "logEvent",
+			"request": {
+				"url": "http://localhost:8080/apis/v1/log-event",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"noun\": \"bill\", \n\t\"verb\": \"pay\", \n\t\"alert\": \"user\", \n\t\"alertType\":\"Notification\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Dummy",
+			"request": {
+				"url": "http://localhost:8080/apis/v1/dummy-logger",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"type\": \"FirstEvent\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create Rule",
+			"request": {
+				"url": "http://localhost:8080/apis/v1/create-rule",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ruleType\" : \"IsExceedingLimit\",\n\t\"noun\": \"bill\", \n\t\"verb\": \"pay\",\n\t\"min\" : 3,\n\t\"minTotal\":10000,\n\t\"timeLimit\":20,\n\t\"alertUser\": \"user\", \n\t\"alertType\":\"Alert\"\n}\n"
+				},
+				"description": "{\n\t\"ruleType\" : \"IsFirstConsumer\",\n\t\"noun\": \"bill\", \n\t\"verb\": \"pay\", \n\t\"alertUser\": \"User\", \n\t\"alertType\":\"Notification\"\n}\n\n\n\n{\n\t\"ruleType\" : \"IsExceedingLimit\",\n\t\"noun\": \"bill\", \n\t\"verb\": \"pay\",\n\t\"min\":5,\n\t\"minTotal\":20000,\n\t\"timeLimit\":20,\n\t\"alertUser\": \"User\", \n\t\"alertType\":\"Alert\"\n}\n\n\n\n\n{\n\t\"ruleType\" : \"ThisButNotThis\",\n\t\"noun\": \"bill\", \n\t\"verb\": \"pay\", \n\t\"nounNotThis\" : \"feedback\",\n\t\"verbNotThis\" : \"posted\",\n\t\"timeLimit\":20,\n\t\"alertUser\": \"Operator\", \n\t\"alertType\":\"Alert\"\n}"
+			},
+			"response": []
+		}
+	]
+}

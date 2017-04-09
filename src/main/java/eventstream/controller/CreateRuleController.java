@@ -20,6 +20,7 @@ import eventstream.consumer.IsFirstConsumer;
 import eventstream.consumer.ThisButNotThis;
 import eventstream.dao.StreamDao;
 import eventstream.domain.PaymentRule;
+import eventstream.domain.Response;
 import eventstream.domain.Rule;
 import eventstream.domain.TwoEventRule;
 import okhttp3.MediaType;
@@ -59,16 +60,14 @@ public class CreateRuleController {
 
 	@RequestMapping(value = "/create-rule", method = RequestMethod.POST)
 	@ResponseBody
-	public String createRule(@RequestBody String ruleString) throws Exception {
+	public Response createRule(@RequestBody String ruleString) throws Exception {
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		Rule rule = objectMapper.readValue(ruleString, Rule.class);
-		String response = "listening";
 
 		String queueName = channel.queueDeclare().getQueue();
 
 		channel.queueBind(queueName, EXCHANGE_NAME, rule.getNoun() + "." + rule.getVerb());
-		System.out.println("%%%%%%%%" + rule.getAlertType() + "." + rule.getAlertUser());
 		Consumer consumer = null;
 
 		switch (rule.getRuleType()) {
@@ -86,6 +85,8 @@ public class CreateRuleController {
 
 		channel.basicConsume(queueName, true, consumer);
 
+		Response response = new Response();
+		response.setStatus("success");
 		return response;
 	}
 

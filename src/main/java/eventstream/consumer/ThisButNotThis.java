@@ -17,6 +17,7 @@ import eventstream.domain.DummyLogModel;
 import eventstream.domain.Event;
 import eventstream.domain.Rule;
 import eventstream.domain.TwoEventRule;
+import eventstream.util.ApplicationContextProvider;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -61,7 +62,7 @@ public class ThisButNotThis extends DefaultConsumer {
 					okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(JSON,
 							objectMapper.writeValueAsString(dummyLogModel));
 					okhttp3.Request request = new okhttp3.Request.Builder()
-							.url("http://localhost:8080/apis/v1/dummy-logger").post(requestBody).build();
+							.url(ApplicationContextProvider.bundle.getString("api.dummy.logger")).post(requestBody).build();
 					okhttp3.Response response;
 
 					OkHttpClient client = new OkHttpClient();

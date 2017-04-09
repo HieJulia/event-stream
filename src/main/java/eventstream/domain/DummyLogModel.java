@@ -1,7 +1,10 @@
 package eventstream.domain;
 
-import java.util.Map;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 public class DummyLogModel {
 	private String alertType;
 	private String alertuser;

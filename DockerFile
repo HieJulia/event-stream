@@ -1,0 +1,4 @@
+From java:8
+Expose 8080
+Add /target/EventStream-1.0-SNAPSHOT.jar EventStream-1.0-SNAPSHOT.jar
+ENTRYPOINT ["java","-jar","EventStream-1.0-SNAPSHOT.jar"]

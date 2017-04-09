@@ -32,6 +32,7 @@ import eventstream.dao.StreamDao;
 import eventstream.domain.Rule;
 import eventstream.domain.Stream;
 import eventstream.exception.InvalidRequestException;
+import eventstream.util.ApplicationContextProvider;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -71,8 +72,8 @@ public class StreamController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			okhttp3.RequestBody body = okhttp3.RequestBody.create(JSON, objectMapper.writeValueAsString(stream));
-			okhttp3.Request request = new okhttp3.Request.Builder().url("http://localhost:8080/apis/v1/log-event")
-					.post(body).build();
+			okhttp3.Request request = new okhttp3.Request.Builder()
+					.url(ApplicationContextProvider.bundle.getString("api.log.event")).post(body).build();
 			okhttp3.Response response;
 			response = client.newCall(request).execute();
 		} catch (IOException e) {

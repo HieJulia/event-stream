@@ -38,6 +38,11 @@ public class IsExceedingLimit extends DefaultConsumer {
 	// contans the rules for operation
 	private static PaymentRule rule;
 
+	public IsExceedingLimit(Channel channel, PaymentRule rule) {
+		super(channel);
+		this.rule = rule;
+	}
+
 	/**
 	 * 
 	 *
@@ -50,8 +55,8 @@ public class IsExceedingLimit extends DefaultConsumer {
 			if (eventList.size() >= rule.getMin()) {
 
 				int sum = 0;
-				for (int i = 0; i < eventList.size(); i++) {
-					sum += eventList.get(i).getProperties().getValue();
+				for (PaymentEvent event : eventList) {
+					sum += event.getProperties().getValue();
 				}
 
 				if (sum >= rule.getMinTotal()) {
@@ -67,7 +72,8 @@ public class IsExceedingLimit extends DefaultConsumer {
 						okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(JSON,
 								objectMapper.writeValueAsString(dummyLogModel));
 						okhttp3.Request request = new okhttp3.Request.Builder()
-								.url("http://localhost:8080/apis/v1/dummy-logger").post(requestBody).build();
+								.url(ApplicationContextProvider.bundle.getString("api.dummy.logger")).post(requestBody)
+								.build();
 						okhttp3.Response response;
 
 						OkHttpClient client = new OkHttpClient();
@@ -82,11 +88,6 @@ public class IsExceedingLimit extends DefaultConsumer {
 			eventList.clear();
 
 		}
-	}
-
-	public IsExceedingLimit(Channel channel, PaymentRule rule) {
-		super(channel);
-		this.rule = rule;
 	}
 
 	@Override

@@ -1,5 +1,9 @@
 package eventstream.domain;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 public class PaymentRule extends Rule {
 	private int min;
 	private int timeLimit;

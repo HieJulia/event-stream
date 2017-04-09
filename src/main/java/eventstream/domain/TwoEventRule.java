@@ -1,5 +1,10 @@
 package eventstream.domain;
 
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 public class TwoEventRule extends Rule {
 	private String nounNotThis;
 	private String verbNotThis;
