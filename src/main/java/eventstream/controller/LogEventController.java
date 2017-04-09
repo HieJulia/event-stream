@@ -36,7 +36,9 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @RestController()
 @RequestMapping("/apis/v1/")
@@ -67,7 +69,7 @@ public class LogEventController {
 
 	}
 
-	@RequestMapping(value = "/logEvent", method = RequestMethod.POST)
+	@RequestMapping(value = "/log-event", method = RequestMethod.POST)
 	@ResponseBody
 	public String logEvent(@RequestBody @Valid Stream streamEvent, BindingResult bindingResult) {
 

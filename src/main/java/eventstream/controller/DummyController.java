@@ -36,110 +36,17 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @RestController()
 @RequestMapping("/apis/v1/")
 public class DummyController {
 
-	@Autowired
-	private StreamDao streamDao;
-
-	private static final String EXCHANGE_NAME = "topic_logs";
-
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-	Connection connection = null;
-	Channel channel = null;
 
-	public DummyController() {
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("localhost");
-		try {
-			connection = factory.newConnection();
-			channel = connection.createChannel();
-
-			channel.exchangeDeclare(EXCHANGE_NAME, "topic");
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	/*
-	 * Add an event to stream
-	 */
-	@RequestMapping(value = "/stream", method = RequestMethod.POST)
-	@ResponseBody
-	public Stream addEvent(@RequestBody @Valid Stream stream, BindingResult bindingResult) throws IOException {
-
-		if (bindingResult.hasErrors()) {
-			throw new InvalidRequestException("Invalid stream", bindingResult);
-		}
-
-		stream = streamDao.save(stream);
-
-		OkHttpClient client = new OkHttpClient();
-		System.out.println("Making http call now");
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		try {
-			okhttp3.RequestBody body = okhttp3.RequestBody.create(JSON, objectMapper.writeValueAsString(stream));
-			okhttp3.Request request = new okhttp3.Request.Builder().url("http://localhost:8080/apis/v1/logEvent")
-					.post(body).build();
-			okhttp3.Response response;
-
-			response = client.newCall(request).execute();
-
-			// test
-			System.out.println(response.body().string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return stream;
-
-	}
-
-	@RequestMapping(value = "/logEvent", method = RequestMethod.POST)
-	@ResponseBody
-	public String logEvent(@RequestBody @Valid Stream streamEvent, BindingResult bindingResult) {
-
-		String response = null;
-		ObjectMapper objectMapper = new ObjectMapper();
-		try {
-			String routingKey = streamEvent.getNoun() + "." + streamEvent.getVerb();
-			String message = objectMapper.writeValueAsString(streamEvent);
-
-			channel.basicPublish(EXCHANGE_NAME, routingKey, null, message.getBytes("UTF-8"));
-			System.out.println(" [x] Sent '" + routingKey + "':'" + message + "'");
-			response = " [x] Sent '" + routingKey + "':'" + message + "'";
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return response;
-	}
-
-	@RequestMapping(value = "/createRule", method = RequestMethod.POST)
-	@ResponseBody
-	public String createRule(@RequestBody @Valid Rule rule, BindingResult bindingResult) throws Exception {
-		String response = "listening";
-
-		String queueName = channel.queueDeclare().getQueue();
-
-		channel.queueBind(queueName, EXCHANGE_NAME, rule.getNoun() + "." + rule.getVerb());
-
-		Consumer consumer = new ThisButNotThis(channel);
-
-		channel.basicConsume(queueName, true, consumer);
-
-		return response;
-	}
-
-	@RequestMapping(value = "/dummy", method = RequestMethod.POST)
+	@RequestMapping(value = "/dummy-logger", method = RequestMethod.POST)
 	@ResponseBody
 	public String receiveMessage(@RequestBody @Valid Stream streamEvent, BindingResult bindingResult) throws Exception {
 		System.out.println("###############################");

@@ -21,6 +21,11 @@ import eventstream.util.ApplicationContextProvider;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 @Component
 public class IsExceedingLimit extends DefaultConsumer{
 	private StreamDao streamDao;

@@ -22,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eventstream.util.JpaConverterJson;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 public class LogEvent {
 

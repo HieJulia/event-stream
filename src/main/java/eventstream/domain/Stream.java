@@ -20,7 +20,9 @@ import org.springframework.data.annotation.CreatedDate;
 import eventstream.util.JpaConverterJson;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @Entity
 @Table(name = "stream")

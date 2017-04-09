@@ -1,5 +1,9 @@
 package eventstream.domain;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 public class Rule {
 	private String noun;
 	

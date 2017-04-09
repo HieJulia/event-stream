@@ -1,7 +1,11 @@
 package eventstream.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FieldErrorResource {
 

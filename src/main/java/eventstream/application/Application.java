@@ -6,7 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.beans.PropertyEditorSupport;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @SpringBootApplication
 public class Application {
@@ -15,13 +17,4 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    /*public static final class ActionEnumEditor extends PropertyEditorSupport {
-
-        @Override
-        public void setAsText(final String text)
-        {
-            setValue(ActionEnum.valueOf(text.toUpperCase()));
-        }
-
-    }*/
 }

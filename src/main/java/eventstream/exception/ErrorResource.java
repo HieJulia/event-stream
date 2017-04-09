@@ -2,7 +2,11 @@ package eventstream.exception;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorResource {
     private String code;

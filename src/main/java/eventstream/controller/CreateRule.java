@@ -36,7 +36,9 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @RestController()
 @RequestMapping("/apis/v1/")
@@ -64,6 +66,22 @@ public class CreateRule {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
+	
+	@RequestMapping(value = "/create-rule", method = RequestMethod.POST)
+	@ResponseBody
+	public String createRule(@RequestBody @Valid Rule rule, BindingResult bindingResult) throws Exception {
+		String response = "listening";
+
+		String queueName = channel.queueDeclare().getQueue();
+
+		channel.queueBind(queueName, EXCHANGE_NAME, rule.getNoun() + "." + rule.getVerb());
+
+		Consumer consumer = new ThisButNotThis(channel);
+
+		channel.basicConsume(queueName, true, consumer);
+
+		return response;
+	}
+
 }

@@ -36,7 +36,9 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 /**
- * Created by Nilesh Bhosale
+ * 
+ *
+ * @author Nilesh Bhosale
  */
 @RestController()
 @RequestMapping("/apis/v1/")

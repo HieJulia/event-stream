@@ -2,7 +2,11 @@ package eventstream.exception;
 
 
 import org.springframework.validation.Errors;
-
+/**
+ * 
+ *
+ * @author Nilesh Bhosale
+ */
 @SuppressWarnings("serial")
 public class InvalidRequestException extends RuntimeException {
     private Errors errors;
