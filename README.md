@@ -35,9 +35,28 @@ Run directly from docker image using docker.io/nileshbhosale/eventstream
 
 
 
-Call Following APIS from Postman (Included postman file in the root folder	)
-	- http://localhost:8080/apis/v1/stream // To register a new event and persist in the database  
+Call Following APIS from Postman (Included postman file in the root folder	
+
+	- http://localhost:8080/apis/v1/stream // To register a new event and persist in the database 
+	
 	- http://localhost:8080/apis/v1/log-event // To log the registry of the event after saving. Pass on to the listeners
+	
 	- http://localhost:8080/apis/v1/create-rule // Create new consumer and listen the queue
+	
 	- http://localhost:8080/apis/v1/dummy-logger // Log Notifications/Alerts
+	
+	
+Design of project:
+The application is based on the concept of Topic based Publish and Subscribe. 
+Every time a event is created it is sent in a queue to whoever is listening. 
+When admin create a rule the application links relative queues to the relavant consumers.
+Hence each consumer gets all the events it has subscribed to and can process its logic to handle the business requirement.
+
+- StreamController handles all the events and dumps them in mysql database.
+- LogEventController forwards the event to the exchange, which in turn forwards to whoever is listening for particular tag.
+- CreateRuleController allows to create rules for business logic. Understands the type of rule and create a suitable Consumer of it. It also binds consumer to listen to current queue with relavant tag.
+- Consumer's are created to address occurence of each related event in stream and perform the operation intended.
+- DummyController only logs all the alerts coming from Consumer.
+
+
 	
