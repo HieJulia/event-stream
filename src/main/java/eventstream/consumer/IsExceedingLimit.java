@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
@@ -15,8 +15,10 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import eventstream.dao.StreamDao;
-import eventstream.domain.LogEvent;
-import eventstream.domain.Stream;
+import eventstream.domain.DummyLogModel;
+import eventstream.domain.PaymentEvent;
+import eventstream.domain.PaymentRule;
+import eventstream.domain.Rule;
 import eventstream.util.ApplicationContextProvider;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,79 +28,87 @@ import okhttp3.OkHttpClient;
  *
  * @author Nilesh Bhosale
  */
-@Component
-public class IsExceedingLimit extends DefaultConsumer{
-	private StreamDao streamDao;
-
+public class IsExceedingLimit extends DefaultConsumer {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-	
-	private static ArrayList<LogEvent> logEvents = new ArrayList();
-	
+	// stores the events stack
+	private static ArrayList<PaymentEvent> eventList = new ArrayList<PaymentEvent>();
+	// maintains the timer while stacking events
 	private static Timer timer;
-	
-	class CheckLimit extends TimerTask
-	{
+	// contans the rules for operation
+	private static PaymentRule rule;
+
+	/**
+	 * 
+	 *
+	 * @author Nilesh Bhosale
+	 */
+	class CheckLimit extends TimerTask {
 		@Override
 		public void run() {
-			System.out.println("Run Me ~");
-			if(logEvents.size()>=5){
-				int sum=0;
-				for(int i=0;i<logEvents.size();i++){
-					//sum+=logEvents.get(i).getProperties().getValue();
-					sum+=5000;
+
+			if (eventList.size() >= rule.getMin()) {
+
+				int sum = 0;
+				for (int i = 0; i < eventList.size(); i++) {
+					sum += eventList.get(i).getProperties().getValue();
 				}
-				if(sum>=20000){
+
+				if (sum >= rule.getMinTotal()) {
+					// Value is overlimit forward to alerts
 					try {
-						ObjectMapper objectMapper= new ObjectMapper();
-						okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(JSON, objectMapper.writeValueAsBytes(logEvents));
-						okhttp3.Request request = new okhttp3.Request.Builder().url("http://localhost:8080/apis/v1/dummy")
-								.post(requestBody).build();
+						ObjectMapper objectMapper = new ObjectMapper();
+
+						DummyLogModel dummyLogModel = new DummyLogModel();
+						dummyLogModel.setAlertType(rule.getAlertType());
+						dummyLogModel.setAlertuser(rule.getAlertUser());
+						dummyLogModel.setData(objectMapper.writeValueAsString(eventList));
+
+						okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(JSON,
+								objectMapper.writeValueAsString(dummyLogModel));
+						okhttp3.Request request = new okhttp3.Request.Builder()
+								.url("http://localhost:8080/apis/v1/dummy-logger").post(requestBody).build();
 						okhttp3.Response response;
 
 						OkHttpClient client = new OkHttpClient();
 						response = client.newCall(request).execute();
-
-						// test
-						System.out.println(response.body().string());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error(e.getMessage());
 					}
-				}else{
-					System.out.println("============Well within limit===============");
 				}
-				
+
 			}
-			System.out.println("============Completed===============");
-			logEvents.clear();
-					
+			// Completed checking clear old values
+			eventList.clear();
+
 		}
 	}
-	
-	public IsExceedingLimit(Channel channel) {
+
+	public IsExceedingLimit(Channel channel, PaymentRule rule) {
 		super(channel);
-		
-		ApplicationContextProvider appContext = new ApplicationContextProvider();
-		streamDao = appContext.getApplicationContext().getBean("streamDao", StreamDao.class);
+		this.rule = rule;
 	}
-	
+
 	@Override
-	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
-			byte[] body) throws IOException {
+	public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+			throws IOException {
+
 		String message = new String(body, "UTF-8");
-		System.out.println(" [x] Received '" + envelope.getRoutingKey() + "':'" + message + "'");
-		
 		ObjectMapper objectMapper = new ObjectMapper();
-		System.out.println( message);
-		LogEvent logEvent = objectMapper.readValue(message, LogEvent.class);
-		System.out.println( logEvent.getNoun()+" "+logEvent.getVerb()+" "+logEvent.getUserid());
-		
-		if(logEvents.size()==0){
-			logEvents.add(logEvent);
+		PaymentEvent logEvent = objectMapper.readValue(message, PaymentEvent.class);
+
+		if (eventList.size() == 0) {
+			// Check if new event is found for first time.
+
+			// Maintain all the events till the timer goes off.
+			eventList.add(logEvent);
 			timer = new Timer();
-			timer.schedule(new CheckLimit(), 20000);
-		}else{
-			logEvents.add(logEvent);
+			timer.schedule(new CheckLimit(), rule.getTimeLimit() * 1000);
+			// Seconds to milliseconds
+
+		} else {
+			// Another event under timelimit. Stack it to the list.
+			eventList.add(logEvent);
 		}
 	}
 }

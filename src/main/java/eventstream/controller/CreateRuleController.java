@@ -1,15 +1,8 @@
 package eventstream.controller;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,23 +10,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 
 import eventstream.consumer.IsExceedingLimit;
 import eventstream.consumer.IsFirstConsumer;
 import eventstream.consumer.ThisButNotThis;
 import eventstream.dao.StreamDao;
+import eventstream.domain.PaymentRule;
 import eventstream.domain.Rule;
-import eventstream.domain.Stream;
-import eventstream.exception.InvalidRequestException;
+import eventstream.domain.TwoEventRule;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 
 /**
  * 
@@ -42,7 +31,7 @@ import okhttp3.OkHttpClient;
  */
 @RestController()
 @RequestMapping("/apis/v1/")
-public class CreateRule {
+public class CreateRuleController {
 
 	@Autowired
 	private StreamDao streamDao;
@@ -54,7 +43,7 @@ public class CreateRule {
 	Connection connection = null;
 	Channel channel = null;
 
-	public CreateRule() {
+	public CreateRuleController() {
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost("localhost");
 		try {
@@ -64,20 +53,36 @@ public class CreateRule {
 			channel.exchangeDeclare(EXCHANGE_NAME, "topic");
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 	}
-	
+
 	@RequestMapping(value = "/create-rule", method = RequestMethod.POST)
 	@ResponseBody
-	public String createRule(@RequestBody @Valid Rule rule, BindingResult bindingResult) throws Exception {
+	public String createRule(@RequestBody String ruleString) throws Exception {
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		Rule rule = objectMapper.readValue(ruleString, Rule.class);
 		String response = "listening";
 
 		String queueName = channel.queueDeclare().getQueue();
 
 		channel.queueBind(queueName, EXCHANGE_NAME, rule.getNoun() + "." + rule.getVerb());
+		System.out.println("%%%%%%%%" + rule.getAlertType() + "." + rule.getAlertUser());
+		Consumer consumer = null;
 
-		Consumer consumer = new ThisButNotThis(channel);
+		switch (rule.getRuleType()) {
+		case "IsFirstConsumer":
+			consumer = new IsFirstConsumer(channel, rule);
+			break;
+		case "IsExceedingLimit":
+			consumer = new IsExceedingLimit(channel, objectMapper.readValue(ruleString, PaymentRule.class));
+			break;
+		case "ThisButNotThis":
+			consumer = new ThisButNotThis(channel, objectMapper.readValue(ruleString, TwoEventRule.class));
+			break;
+
+		}
 
 		channel.basicConsume(queueName, true, consumer);
 

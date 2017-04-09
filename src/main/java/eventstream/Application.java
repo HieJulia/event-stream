@@ -1,9 +1,8 @@
-package eventstream.application;
+package eventstream;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.beans.PropertyEditorSupport;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 

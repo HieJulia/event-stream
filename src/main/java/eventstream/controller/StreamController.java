@@ -55,29 +55,28 @@ public class StreamController {
 	 */
 	@RequestMapping(value = "/stream", method = RequestMethod.POST)
 	@ResponseBody
-	public Stream addEvent(@RequestBody @Valid Stream stream, BindingResult bindingResult) throws IOException {
+	public Stream addEvent(@RequestBody @Valid Stream stream, BindingResult bindingResult) {
 
+		// Check for validation error in request
 		if (bindingResult.hasErrors()) {
 			throw new InvalidRequestException("Invalid stream", bindingResult);
 		}
 
+		// Save the stream
 		stream = streamDao.save(stream);
 
-		OkHttpClient client = new OkHttpClient();
-		System.out.println("Making http call now");
+		// Trigger a log event call to send event to listening queues
 
+		OkHttpClient client = new OkHttpClient();
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			okhttp3.RequestBody body = okhttp3.RequestBody.create(JSON, objectMapper.writeValueAsString(stream));
-			okhttp3.Request request = new okhttp3.Request.Builder().url("http://localhost:8080/apis/v1/logEvent")
+			okhttp3.Request request = new okhttp3.Request.Builder().url("http://localhost:8080/apis/v1/log-event")
 					.post(body).build();
 			okhttp3.Response response;
 			response = client.newCall(request).execute();
-			// test
-			System.out.println(response.body().string());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 
 		return stream;

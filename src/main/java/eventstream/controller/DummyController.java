@@ -1,14 +1,9 @@
 package eventstream.controller;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,23 +12,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 
-import eventstream.consumer.IsExceedingLimit;
-import eventstream.consumer.IsFirstConsumer;
-import eventstream.consumer.ThisButNotThis;
-import eventstream.dao.StreamDao;
-import eventstream.domain.Rule;
-import eventstream.domain.Stream;
-import eventstream.exception.InvalidRequestException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
+import eventstream.domain.DummyLogModel;
+import eventstream.domain.Response;
 
 /**
  * 
@@ -48,12 +29,22 @@ public class DummyController {
 
 	@RequestMapping(value = "/dummy-logger", method = RequestMethod.POST)
 	@ResponseBody
-	public String receiveMessage(@RequestBody @Valid Stream streamEvent, BindingResult bindingResult) throws Exception {
-		System.out.println("###############################");
-		System.out.println("Notification/Alert");
-		System.out.println(streamEvent);
-		System.out.println("###############################");
-		return "Success";
+	public Response receiveMessage(@RequestBody @Valid DummyLogModel dumymLogModel, BindingResult bindingResult)
+			throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		logger.info("###############################");
+		if (dumymLogModel.getAlertType().equals("Notification"))
+			logger.info("Notification");
+		if (dumymLogModel.getAlertType().equals("Alert"))
+			logger.info("Alert");
+		logger.info(" for " + dumymLogModel.getAlertuser());
+		logger.info(" with data ");
+		logger.info(objectMapper.writeValueAsString(dumymLogModel));
+		logger.info("###############################");
+
+		Response response = new Response();
+		response.setStatus("success");
+		return response;
 	}
 
 }

@@ -1,12 +1,13 @@
 package eventstream.dao;
 
-import org.springframework.data.repository.CrudRepository;
-
-import eventstream.domain.Stream;
-
 import java.util.List;
 
 import javax.transaction.Transactional;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Component;
+
+import eventstream.domain.Stream;
 
 /**
  * 
